@@ -1,0 +1,201 @@
+---
+/**
+ * MAIA, drawn as its two halves: the path a merchant takes, and the internal
+ * loop that keeps that path reliable.
+ *
+ * Built in HTML/CSS rather than SVG so it reflows on narrow screens and inherits
+ * theme tokens. Every step is sourced from Chan's own description of the system
+ * — do not invent stages, and keep the copy terse or the columns crush.
+ */
+const TRACKS = [
+  {
+    label: 'What a merchant runs',
+    tone: 'external',
+    steps: [
+      {
+        index: '01',
+        title: 'Hosted script',
+        body: 'A merchant pulls the script rather than installing a toolchain.',
+      },
+      {
+        index: '02',
+        title: 'Slash command',
+        body: 'One command names the job — integrate PayLater, upgrade the SDK.',
+      },
+      {
+        index: '03',
+        title: 'Skills do the work',
+        body: 'SDK v4 → v5, PayLater, ACDC, Apple Pay, Google Pay applied in place.',
+      },
+    ],
+  },
+  {
+    label: 'How it stays reliable',
+    tone: 'internal',
+    steps: [
+      {
+        index: '04',
+        title: 'Scheduled or manual run',
+        body: 'The feedback-loop platform kicks off a run against real targets.',
+      },
+      {
+        index: '05',
+        title: 'Real storefronts, containerised',
+        body: 'Medusa, Magento, ZenCart, OpenCart brought up with Docker Compose.',
+      },
+      {
+        index: '06',
+        title: 'Integration runs inside',
+        body: 'The same script a merchant would run, executed in the container.',
+      },
+      {
+        index: '07',
+        title: 'Playwright verifies',
+        body: 'E2E checks the integration actually works, with Claude traces kept.',
+      },
+      {
+        index: '08',
+        title: 'Skills improve',
+        body: 'Results feed SkillOpt, which sharpens the skills merchants get next.',
+      },
+    ],
+  },
+];
+---
+
+<figure class="maia" role="group" aria-label="Diagram of the MAIA integration agent and its reliability loop">
+  {
+    TRACKS.map((track) => (
+      <section class:list={['maia__track', `maia__track--${track.tone}`]}>
+        <h4 class="maia__label">{track.label}</h4>
+        <ol class="maia__steps">
+          {track.steps.map((step) => (
+            <li class="maia__step">
+              <span class="maia__index" aria-hidden="true">
+                {step.index}
+              </span>
+              <h5 class="maia__title">{step.title}</h5>
+              <p class="maia__body">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))
+  }
+
+  <figcaption class="maia__loop">
+    <span class="maia__loop-icon" aria-hidden="true">↺</span>
+    Closed loop — every failure found against a real storefront becomes a skill improvement, so the
+    next merchant runs a better version than the last one did.
+  </figcaption>
+</figure>
+
+<style>
+  .maia {
+    margin: 0;
+    padding: var(--space-lg);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .maia__track + .maia__track {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+  }
+
+  .maia__label {
+    font-size: var(--step--2);
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: var(--space-md);
+  }
+
+  .maia__steps {
+    display: grid;
+    gap: var(--space-md);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  @media (min-width: 46rem) {
+    .maia__steps {
+      /* auto-fit rather than a fixed count: below roughly 9rem per column the
+         labels stop being readable, so they wrap instead of crushing. */
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      gap: var(--space-sm);
+    }
+  }
+
+  .maia__step {
+    position: relative;
+    padding: var(--space-md);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Connector chevron: down when stacked, right when in a row. */
+  .maia__step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-right: 1.5px solid var(--accent);
+    border-bottom: 1.5px solid var(--accent);
+    left: 50%;
+    bottom: calc(var(--space-md) * -1 + 1px);
+    transform: translate(-50%, 50%) rotate(45deg);
+  }
+
+  @media (min-width: 46rem) {
+    .maia__step:not(:last-child)::after {
+      left: auto;
+      right: calc(var(--space-sm) * -1);
+      top: 50%;
+      bottom: auto;
+      transform: translate(50%, -50%) rotate(-45deg);
+    }
+  }
+
+  .maia__index {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .maia__title {
+    font-size: var(--step--1);
+    font-weight: 620;
+    margin-bottom: var(--space-2xs);
+  }
+
+  .maia__body {
+    font-size: var(--step--2);
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .maia__loop {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px dashed var(--border-strong);
+    font-size: var(--step--2);
+    color: var(--text-muted);
+  }
+
+  .maia__loop-icon {
+    color: var(--accent);
+    font-size: var(--step-0);
+    line-height: 1;
+  }
+</style>
