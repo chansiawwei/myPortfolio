@@ -1,0 +1,41 @@
+---
+import { SITE } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<section class="section" id="contact">
+  <h2 class="section-label">Contact</h2>
+
+  <div class="contact reveal">
+    <h3 class="contact__title">Have an idea to share?</h3>
+    <p class="contact__text">
+      I'm always happy to talk about interesting problems, collaboration, or a role that's a good
+      fit.
+    </p>
+    <a class="btn btn--primary" href={`mailto:${SITE.email}`}>
+      <Icon name="mail" size={16} />
+      Get in touch
+    </a>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding: var(--space-xl);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .contact__title {
+    font-size: var(--step-2);
+    margin-bottom: var(--space-xs);
+  }
+
+  .contact__text {
+    color: var(--text-muted);
+    font-size: var(--step--1);
+    max-width: 46ch;
+    margin-bottom: var(--space-lg);
+  }
+</style>

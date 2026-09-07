@@ -1,0 +1,218 @@
+---
+import { NAV_LINKS, SITE, SOCIALS } from '../data/site';
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header class="rail">
+  <div class="rail__top">
+    <div class="rail__headline">
+      <h1 class="rail__name">{SITE.name}</h1>
+      <p class="rail__role">{SITE.role}</p>
+      <p class="rail__blurb">
+        Building scalable web applications at <a
+          class="link"
+          href={SITE.employerUrl}
+          target="_blank"
+          rel="noopener">{SITE.employer}</a
+        > — and AI tooling on the side.
+      </p>
+    </div>
+
+    <nav class="rail__nav" aria-label="Section">
+      <ul>
+        {
+          NAV_LINKS.map((link) => (
+            <li>
+              <a href={link.href} class="rail__link" data-nav-link>
+                <span class="rail__indicator" aria-hidden="true" />
+                <span class="rail__link-text">{link.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="rail__bottom">
+    <ul class="rail__socials">
+      {
+        SOCIALS.map((social) => (
+          <li>
+            <a
+              class="rail__social"
+              href={social.href}
+              target={social.icon === 'mail' ? undefined : '_blank'}
+              rel="noopener"
+            >
+              <Icon name={social.icon} size={20} />
+              <span class="sr-only">{social.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <ThemeToggle />
+  </div>
+</header>
+
+<script>
+  // Highlights the nav entry for whichever section is currently in view.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')];
+  const sections = links
+    .map((link) => document.querySelector(link.getAttribute('href') ?? ''))
+    .filter((el): el is Element => el !== null);
+
+  if (sections.length > 0) {
+    const setActive = (id: string) => {
+      links.forEach((link) => {
+        link.classList.toggle('is-active', link.getAttribute('href') === `#${id}`);
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (visible) setActive(visible.target.id);
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: [0.1, 0.5, 1] }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+  }
+</script>
+
+<style>
+  .rail {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl) var(--space-lg);
+  }
+
+  @media (min-width: 64rem) {
+    .rail {
+      position: sticky;
+      top: 0;
+      max-height: 100svh;
+      padding-block: var(--space-3xl) var(--space-2xl);
+    }
+  }
+
+  .rail__name {
+    font-size: var(--step-4);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    margin-bottom: var(--space-2xs);
+  }
+
+  .rail__role {
+    font-size: var(--step-1);
+    font-weight: 550;
+    color: var(--text);
+    margin-bottom: var(--space-md);
+  }
+
+  .rail__blurb {
+    color: var(--text-muted);
+    max-width: 34ch;
+    font-size: var(--step--1);
+  }
+
+  .rail__nav {
+    display: none;
+    margin-top: var(--space-2xl);
+  }
+
+  /* The rail only becomes a persistent nav when there's room beside content. */
+  @media (min-width: 64rem) {
+    .rail__nav {
+      display: block;
+    }
+  }
+
+  .rail__nav ul {
+    display: grid;
+    gap: var(--space-2xs);
+    list-style: none;
+    padding: 0;
+  }
+
+  .rail__link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-block: var(--space-2xs);
+    font-size: var(--step--1);
+    font-weight: 620;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    transition: color var(--transition);
+  }
+
+  .rail__indicator {
+    display: block;
+    width: 2rem;
+    height: 1px;
+    background: var(--text-faint);
+    transition: width var(--transition), background-color var(--transition);
+  }
+
+  .rail__link:hover,
+  .rail__link.is-active {
+    color: var(--text);
+  }
+
+  .rail__link:hover .rail__indicator,
+  .rail__link.is-active .rail__indicator {
+    width: 3.5rem;
+    background: var(--accent);
+  }
+
+  .rail__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  /* Only needed once the nav sits above it; on mobile the flex gap alone is
+     enough, and the extra margin left a dead band above the social row. */
+  @media (min-width: 64rem) {
+    .rail__bottom {
+      margin-top: var(--space-xl);
+    }
+  }
+
+  .rail__socials {
+    display: flex;
+    /* No gap: the 44px hit areas below provide the spacing themselves. The
+       negative inline start pulls the first icon back into optical alignment
+       with the rail text. */
+    gap: 0;
+    margin-inline-start: -0.7rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .rail__social {
+    display: grid;
+    place-items: center;
+    /* 44px minimum touch target (WCAG 2.5.8) while the icon itself stays 20px. */
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    color: var(--text-faint);
+    transition: color var(--transition), transform var(--transition);
+  }
+
+  .rail__social:hover {
+    color: var(--text);
+    transform: translateY(-2px);
+  }
+</style>

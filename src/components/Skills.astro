@@ -1,0 +1,60 @@
+---
+import { SKILL_GROUPS } from '../data/skills';
+---
+
+<section class="section" id="skills">
+  <h2 class="section-label">Skills</h2>
+
+  <div class="skills reveal">
+    {
+      SKILL_GROUPS.map((group) => (
+        <div class="skills__group">
+          <h3 class="skills__title">{group.title}</h3>
+          <ul class="skills__list">
+            {group.skills.map((skill) => (
+              <li class="chip skills__chip">{skill}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .skills {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  @media (min-width: 40rem) {
+    .skills {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-xl);
+    }
+  }
+
+  .skills__title {
+    font-size: var(--step--2);
+    font-weight: 620;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-bottom: var(--space-xs);
+    margin-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skills__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    list-style: none;
+    padding: 0;
+  }
+
+  .skills__chip {
+    font-size: var(--step--1);
+    padding: 0.35em 0.85em;
+  }
+</style>

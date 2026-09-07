@@ -1,0 +1,177 @@
+---
+import '@fontsource-variable/inter/wght.css';
+import '../styles/global.css';
+
+import SEO from '../components/SEO.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0a0c10" />
+
+    <SEO title={title} description={description} />
+
+    {/* Runs before first paint so the theme never flashes. */}
+    <script is:inline>
+      (() => {
+        const stored = (() => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        })();
+        // Dark is the designed default; light is opt-in via the toggle and then
+        // remembered. The design is built dark-first and reads weaker in light.
+        document.documentElement.dataset.theme = stored ?? 'dark';
+
+        // Gates the reveal styles — without it every .reveal stays visible, so a
+        // JS failure can never blank the page.
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <div class="shell" id="top">
+      <Sidebar />
+      <main id="main">
+        <slot />
+        <Footer />
+      </main>
+    </div>
+
+    <div class="glow" aria-hidden="true"></div>
+
+    <script>
+      const revealables = document.querySelectorAll<HTMLElement>('.reveal');
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion) {
+        revealables.forEach((el) => el.classList.add('is-visible'));
+      } else {
+        const reveal = (el: Element) => {
+          el.classList.add('is-visible');
+          observer.unobserve(el);
+        };
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) reveal(entry.target);
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.05 }
+        );
+
+        revealables.forEach((el) => observer.observe(el));
+
+        /**
+         * Safety net. A fast flick-scroll on a phone can carry an element past
+         * the viewport between two animation frames, so the observer never sees
+         * it intersect and the content stays permanently invisible. This sweeps
+         * up anything already scrolled past.
+         */
+        const revealPassed = () => {
+          revealables.forEach((el) => {
+            if (el.classList.contains('is-visible')) return;
+            if (el.getBoundingClientRect().top < window.innerHeight) reveal(el);
+          });
+        };
+
+        let sweepTimer: number | undefined;
+        window.addEventListener(
+          'scroll',
+          () => {
+            window.clearTimeout(sweepTimer);
+            sweepTimer = window.setTimeout(revealPassed, 120);
+          },
+          { passive: true }
+        );
+
+        window.addEventListener('load', revealPassed);
+      }
+    </script>
+
+    <style>
+      .shell {
+        display: grid;
+        gap: 0 var(--space-3xl);
+        max-width: 82rem;
+        margin-inline: auto;
+        padding-inline: var(--space-lg);
+      }
+
+      @media (min-width: 64rem) {
+        .shell {
+          grid-template-columns: minmax(0, 19rem) minmax(0, 1fr);
+          align-items: start;
+          padding-inline: var(--space-2xl);
+        }
+      }
+
+      main {
+        min-width: 0;
+        padding-bottom: var(--space-2xl);
+      }
+
+      @media (min-width: 64rem) {
+        main {
+          padding-block: var(--space-3xl) var(--space-2xl);
+        }
+      }
+
+      /* Fixed, non-scrolling ambient wash behind everything. */
+      .glow {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            42rem 32rem at 78% -8%,
+            color-mix(in srgb, var(--accent) 16%, transparent),
+            transparent 70%
+          ),
+          radial-gradient(
+            34rem 28rem at 8% 12%,
+            color-mix(in srgb, var(--violet-400) 9%, transparent),
+            transparent 70%
+          );
+      }
+
+      .skip-link {
+        position: absolute;
+        top: var(--space-xs);
+        left: var(--space-xs);
+        z-index: 100;
+        padding: var(--space-xs) var(--space-md);
+        background: var(--accent);
+        color: var(--accent-contrast);
+        border-radius: var(--radius-sm);
+        transform: translateY(-150%);
+        transition: transform var(--transition);
+      }
+
+      .skip-link:focus-visible {
+        transform: translateY(0);
+      }
+    </style>
+  </body>
+</html>

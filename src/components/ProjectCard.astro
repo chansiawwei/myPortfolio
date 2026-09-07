@@ -1,0 +1,313 @@
+---
+import { Image } from 'astro:assets';
+import type { Project } from '../data/projects';
+import Icon from './Icon.astro';
+import HarnessDiagram from './HarnessDiagram.astro';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+const {
+  title,
+  context,
+  description,
+  highlights,
+  tech,
+  image,
+  alt,
+  visual,
+  links,
+  isDeprecated,
+  isFeatured,
+} = project;
+
+/** Monogram fallback for projects with no UI to screenshot. */
+const monogram = title
+  .split(' ')
+  .slice(0, 2)
+  .map((word) => word[0])
+  .join('');
+
+/** Diagram projects stack full-width — a schematic needs more room than a thumb. */
+const isWide = visual !== undefined;
+---
+
+{/*
+  Screenshots are contained, never cover-cropped: the set ranges from 0.55 to
+  1.90 aspect ratio and cropping to one shape cuts away what the product does.
+
+  Deliberately no `image.width`/`image.height` reads — touching those makes Vite
+  emit every original PNG into dist/ next to the optimized WebP.
+*/}
+<li class:list={['row', 'reveal', isWide && 'row--wide']}>
+  <div class="row__body">
+    <p class="row__context">{context}</p>
+    <h3 class="row__title">{title}</h3>
+    <p class="row__description">{description}</p>
+
+    {
+      highlights && (
+        <ul class="row__highlights">
+          {highlights.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <ul class="row__tech" aria-label="Technologies used">
+      {tech.map((item) => <li class="chip">{item}</li>)}
+    </ul>
+
+    {
+      (links.length > 0 || isDeprecated) && (
+        <div class="row__actions">
+          {links.map((link) => (
+            <a class="row__link" href={link.href} target="_blank" rel="noopener">
+              <Icon name="external" size={14} />
+              {link.label}
+            </a>
+          ))}
+          {isDeprecated && <span class="row__badge">Archived</span>}
+        </div>
+      )
+    }
+  </div>
+
+  <div class:list={['row__media', !image && !visual && 'row__media--monogram', isWide && 'row__media--wide']}>
+    {visual === 'harness' && <HarnessDiagram />}
+    {
+      !visual && image && (
+        <Image
+          src={image}
+          alt={alt ?? title}
+          width={640}
+          loading={isFeatured ? 'eager' : 'lazy'}
+          fetchpriority={isFeatured ? 'high' : 'auto'}
+          class="row__image"
+        />
+      )
+    }
+    {
+      !visual && !image && (
+        <div class="row__monogram" aria-hidden="true">
+          {monogram}
+        </div>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .row {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    margin-inline: calc(var(--space-md) * -1);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: background-color var(--transition), border-color var(--transition),
+      opacity var(--transition);
+  }
+
+  @media (min-width: 40rem) {
+    .row {
+      grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+      gap: var(--space-lg);
+    }
+
+    /* Media first in the source order would fight the wide layout, so the
+       thumbnail is placed by column instead. */
+    .row__media {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .row__body {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .row--wide {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .row--wide .row__body,
+    .row--wide .row__media {
+      grid-column: 1;
+      grid-row: auto;
+    }
+  }
+
+  .row:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+  }
+
+  /* Dim the siblings of whichever row is hovered, so focus follows the cursor. */
+  @media (hover: hover) and (min-width: 40rem) {
+    :global(.projects__list:hover) .row:not(:hover) {
+      opacity: 0.55;
+    }
+  }
+
+  .row__media {
+    /* Body comes first in the DOM so assistive tech reads the description
+       before the visual; order/placement puts the thumbnail back on top. */
+    order: -1;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 10;
+    padding: var(--space-2xs);
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  /* The diagram reads as a supporting detail, so it follows the prose. */
+  .row--wide .row__media {
+    order: 0;
+  }
+
+  /* A diagram sizes itself; forcing an aspect ratio would crop or letterbox it. */
+  .row__media--wide {
+    aspect-ratio: auto;
+    display: block;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .row__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .row:hover .row__image {
+    transform: scale(1.03);
+  }
+
+  /* A monogram carries no information, so it doesn't earn a screenshot's height
+     in the single-column layout. */
+  @media (max-width: 39.99rem) {
+    .row__media--monogram {
+      aspect-ratio: 3 / 1;
+    }
+  }
+
+  .row__monogram {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    font-family: var(--font-mono);
+    font-size: var(--step-3);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+    background: var(--accent-subtle);
+    border-radius: var(--radius-sm);
+  }
+
+  .row__context {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .row__title {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-xs);
+    transition: color var(--transition);
+  }
+
+  .row--wide .row__title {
+    font-size: var(--step-2);
+  }
+
+  .row:hover .row__title {
+    color: var(--accent);
+  }
+
+  .row__description {
+    color: var(--text-muted);
+    font-size: var(--step--1);
+    margin-bottom: var(--space-md);
+    max-width: 68ch;
+  }
+
+  .row__highlights {
+    display: grid;
+    gap: var(--space-xs);
+    padding-left: 1.1em;
+    margin-bottom: var(--space-md);
+    max-width: 72ch;
+    color: var(--text-muted);
+    font-size: var(--step--1);
+  }
+
+  .row__highlights li::marker {
+    color: var(--accent);
+  }
+
+  .row__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    list-style: none;
+    padding: 0;
+    margin-bottom: var(--space-sm);
+  }
+
+  .row__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .row__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-size: var(--step--1);
+    font-weight: 580;
+    color: var(--text);
+    transition: color var(--transition);
+  }
+
+  /* Standalone action links need a real touch target on small screens; on
+     desktop they stay compact text links. */
+  @media (hover: none), (pointer: coarse), (max-width: 39.99rem) {
+    .row__link {
+      min-height: 2.75rem;
+    }
+
+    .row__actions {
+      gap: var(--space-lg);
+    }
+  }
+
+  .row__link:hover {
+    color: var(--accent);
+  }
+
+  .row__badge {
+    font-size: var(--step--2);
+    font-weight: 550;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+</style>

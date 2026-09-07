@@ -1,0 +1,32 @@
+---
+import { SITE, SOCIALS } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <p>
+    © {year} {SITE.name}. Built with <a
+      class="link"
+      href="https://astro.build"
+      target="_blank"
+      rel="noopener">Astro</a
+    >, deployed on Firebase.
+  </p>
+  <a class="link" href={SOCIALS[1].href} target="_blank" rel="noopener">Source</a>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding-top: var(--space-xl);
+    margin-top: var(--space-xl);
+    border-top: 1px solid var(--border);
+    font-size: var(--step--2);
+    color: var(--text-faint);
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+import { EXPERIENCE } from '../data/experience';
+---
+
+<section class="section" id="experience">
+  <h2 class="section-label">Experience</h2>
+
+  <ol class="exp__list">
+    {
+      EXPERIENCE.map((role) => (
+        <li class="exp__row reveal">
+          <p class="exp__period">{role.period}</p>
+          <div class="exp__body">
+            <h3 class="exp__title">
+              {role.title} ·{' '}
+              {role.companyUrl ? (
+                <a class="exp__company" href={role.companyUrl} target="_blank" rel="noopener">
+                  {role.company}
+                </a>
+              ) : (
+                <span class="exp__company">{role.company}</span>
+              )}
+            </h3>
+            {role.location && <p class="exp__location">{role.location}</p>}
+            <p class="exp__summary">{role.summary}</p>
+            <ul class="exp__highlights">
+              {role.highlights.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+            <ul class="exp__tech" aria-label="Technologies used">
+              {role.tech.map((item) => (
+                <li class="chip">{item}</li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .exp__list {
+    display: grid;
+    gap: var(--space-xs);
+    list-style: none;
+    padding: 0;
+  }
+
+  .exp__row {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    margin-inline: calc(var(--space-md) * -1);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: background-color var(--transition), border-color var(--transition);
+  }
+
+  @media (min-width: 40rem) {
+    .exp__row {
+      grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+      gap: var(--space-lg);
+    }
+  }
+
+  .exp__row:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border);
+  }
+
+  .exp__period {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-top: 0.2em;
+  }
+
+  .exp__title {
+    font-size: var(--step-0);
+    font-weight: 620;
+    margin-bottom: var(--space-2xs);
+  }
+
+  .exp__company {
+    color: var(--accent);
+  }
+
+  .exp__location {
+    font-size: var(--step--2);
+    color: var(--text-faint);
+    margin-bottom: var(--space-xs);
+  }
+
+  .exp__summary {
+    color: var(--text);
+    font-size: var(--step--1);
+    margin-bottom: var(--space-sm);
+  }
+
+  .exp__highlights {
+    display: grid;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+    padding-left: 1.1em;
+    color: var(--text-muted);
+    font-size: var(--step--1);
+  }
+
+  .exp__highlights li::marker {
+    color: var(--accent);
+  }
+
+  .exp__tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-xs);
+    list-style: none;
+    padding: 0;
+  }
+</style>

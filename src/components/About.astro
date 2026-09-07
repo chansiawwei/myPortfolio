@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import { SITE } from '../data/site';
+import Icon from './Icon.astro';
+import profile from '../assets/profile.jpeg';
+---
+
+<section class="section" id="about">
+  <h2 class="section-label">About</h2>
+
+  <div class="about reveal">
+    <div class="prose">
+      <p>
+        I'm a senior software engineer at <a
+          class="link"
+          href={SITE.employerUrl}
+          target="_blank"
+          rel="noopener">PayPal</a
+        > in {SITE.location}, specialising in <strong>scalable web applications</strong>. I work
+        end to end — from building intuitive UI through API integration and CI/CD automation to
+        shaping architecture that stays maintainable.
+      </p>
+      <p>
+        Before PayPal I spent four and a half years at <strong>ByteDance</strong> as a senior
+        frontend engineer, building data-warehousing products and leading the practices around
+        them: trunk-based development, a feature-flag system that cut frontend rollbacks by 90%,
+        and a shared React component library adopted across teams.
+      </p>
+      <p>
+        Most of my attention now goes to <strong>agent reliability</strong> — building tooling
+        that does real integration work for merchants, and the harness that proves it still works
+        against real storefronts rather than fixtures. I graduated from Swinburne University of
+        Technology with a Bachelor of Information &amp; Technology, and what pulls me in most is
+        solving real customer problems with a clear business justification.
+      </p>
+    </div>
+
+    <figure class="about__aside">
+      <Image
+        src={profile}
+        alt={`Portrait of ${SITE.name}`}
+        width={280}
+        densities={[1, 2]}
+        class="about__photo"
+      />
+      <a class="btn btn--ghost about__cta" href={SITE.resumeUrl} target="_blank" rel="noopener">
+        Résumé
+        <Icon name="external" size={14} />
+      </a>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  @media (min-width: 46rem) {
+    .about {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-2xl);
+      align-items: start;
+    }
+  }
+
+  .about__aside {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-md);
+    margin: 0;
+  }
+
+  .about__photo {
+    width: 11rem;
+    height: 11rem;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .about__cta {
+    width: 100%;
+    justify-content: center;
+  }
+</style>
